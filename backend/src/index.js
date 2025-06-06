@@ -1,15 +1,15 @@
 import express from 'express'
 import dotenv from 'dotenv'
+import authroute from '../src/routes/auth.route.js'
 
 dotenv.config();
 const port=process.env.PORT
 
 const app=express();
 
-app.get("/",(req,res)=>{
-    res.send("hello shubham")
-})
+app.use('/api/auth',authroute)
+
 
 app.listen(port,()=>{
-    console.log("server runing on port number 6001")
+    console.log(`server runing on port number ${port}`)
 })
