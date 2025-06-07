@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 export async function signup(req, res) {
@@ -36,22 +37,55 @@ export async function signup(req, res) {
         expiresIn: "7d",
       }
     );
-    res.cookie("token", token,{
-      maxAge: 7 * 24 *60 *60 * 1000,
+    res.cookie("token", token, {
+      maxAge: 7 * 24 * 60 * 60 * 1000,
       httpOnly: true, //prevent xss attacks
-      sameSite:"strict", //prevent CSRF attacks
-      secure:process.env.NODE_ENV= "production"
+      sameSite: "strict", //prevent CSRF attacks
+      secure: (process.env.NODE_ENV = "production"),
     });
 
     res.status(201).json({ success: true, user: newUser });
   } catch (error) {
     console.log("Error in Signup controller");
-    res.status(400).json({message:"error in signup controller"})
+    res.status(400).json({ message: "error in signup controller" });
   }
 }
 
-export function login(req, res) {
-  res.send("login controller");
+export async function login(req, res) {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ message: "both email and password are requird" });
+    }
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({ message: "invalid credentials" });
+    }
+
+    const passwordmatch = await bcrypt.compare(password, user.password);
+    if (!passwordmatch) {
+      return res.status(400).json({ message: "invalid 01" });
+    }
+
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, {
+      expiresIn: "7d",
+    });
+    res.cookie("token", token, {
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      httpOnly: true, //prevent xss attacks
+      sameSite: "strict", //prevent CSRF attacks
+      secure: (process.env.NODE_ENV = "production"),
+    });
+
+    res.status(201).json({ success: true, user: user });
+  } catch (error) {
+    console.log("error in login controller");
+    res.status(400).json({ message: "error in login controller" });
+  }
 }
 
 export function logout(req, res) {
