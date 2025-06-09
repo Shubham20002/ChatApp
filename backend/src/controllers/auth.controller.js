@@ -105,3 +105,37 @@ export function logout(req, res) {
   res.clearCookie("token");
   res.status(200).json({message:"user logout successfully"})
 }
+
+
+export async function onboard(req,res){
+  try {
+    console.log("aaaaaaaa",req.body);
+    
+    const userId= req.user._id;
+    const {fullName,bio,nativeLanguage ,learningLanguage,location}=req.body;
+
+    if(!fullName || !bio || !nativeLanguage  || !learningLanguage || !location){
+      res.status(400).json({message:"All fields are required"});
+    }
+    const updatedUser= await User.findByIdAndUpdate(userId,{
+      ...req.body,
+      isOnboarded:true
+    },{new:true})
+    try{
+      await upsertStreamUser({
+        id:updatedUser._id.toString(),
+        fullName: updatedUser.fullName,
+        image:updatedUser.profilePic || ""
+       })
+    }
+    catch(error){
+     console.log("stream user update error",error)
+    }
+     
+    res.status(200).json({message:"User Onboarded successfully",user:updatedUser})
+  } catch (error) {
+    console.log("error during user onboarding",error)
+    res.status(400).json({message:"Error during user onboarding"})
+  }
+
+}
