@@ -40,12 +40,10 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    friends: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
+    friends: [{ 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: 'User'
+     }]
   },
   { timestamps: true }
 );
@@ -63,7 +61,7 @@ userSchema.pre("save", async function (next) {
   }
   
 })
-const User= mongoose.model("USER",userSchema);
+const User= mongoose.model("User",userSchema);
 
 
 
