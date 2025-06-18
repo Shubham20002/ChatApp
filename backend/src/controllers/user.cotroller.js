@@ -104,3 +104,35 @@ export async function acceptFriendRequest(req,res) {
   }
   
 }
+
+export async function getFriendRequests(req,res){
+  try {
+    const incomingReqs= await FriendRequest.find({
+      recipient:req.user.id,
+      status:"pending"
+    }).populate("sender","fullName profilePic nativeLanguage learningLanguage");
+
+    const acceptReqs= await FriendRequest.find({
+      sender:req.user.id,
+      status:"accepted"
+    }).populate("recipient","fullName profilePic");
+
+    res.status(200).json({incomingReqs,acceptReqs})
+    
+  } catch (error) {
+   res.status(400).json({message:"error in get friendrequest"}) 
+  }
+}
+
+export async function getOutgoingFriendReqs(req,res){
+  try {
+    const outgoingRequests=await FriendRequest.find({
+      sender:req.user.id,
+      status:"pending"
+    }).populate("recipient","fullName profilePic nativeLanguage learningLanguage")
+    res.send(200).json({outgoingRequests})
+  } catch (error) {
+    res.send(400).json({message:"error in outgoing friendrequest api"})
+  }
+
+}
