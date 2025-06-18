@@ -76,3 +76,31 @@ export async function sendFriendRequest(req,res) {
         console.log("Error while sending friend request")
      }
 }
+
+export async function acceptFriendRequest(req,res) {
+  try {
+    const {id:requestId}=req.params;
+    const friendRequest=await FriendRequest.findById(requestId);
+
+    if(!friendRequest){
+      res.status(400).json({message:"Friend request not found"})
+    }
+    
+    friendRequest.status="accepted";
+    await friendRequest.save();
+
+    await User.findByIdAndUpdate(friendRequest.sender,{
+      $addToSet:{friends:friendRequest.recipient}
+    })
+
+    await User.findByIdAndUpdate(friendRequest.recipient,{
+      $addToSet:{friends:friendRequest.sender}
+    })
+
+    res.status(200).json({message:"Friend request accepted successfully"})
+    
+  } catch (error) {
+    res.status(500).json({message:"Internal server error"})
+  }
+  
+}
