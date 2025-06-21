@@ -2,6 +2,7 @@ import express from 'express'
 import dotenv from 'dotenv'
 import authRoute from '../src/routes/auth.route.js'
 import userRoute from '../src/routes/user.route.js'
+import chatRoute from "../src/routes/chat.route.js"
 import {connectDb} from './lib/db.js'
 import cookieParser from 'cookie-parser';
 
@@ -15,6 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser())
 app.use('/api/auth',authRoute)
 app.use('/api/user',userRoute)
+app.use('/api/chat',chatRoute)
 
 
 
